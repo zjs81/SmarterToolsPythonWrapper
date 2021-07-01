@@ -1,2 +1,3 @@
 # SmarterToolsPythonWrapper
-A python wrapper for the SmarterTools API WIP
+A python wrapper for the SmarterTools SmarterMail API Currently a WIP
+

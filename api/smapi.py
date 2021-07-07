@@ -134,3 +134,144 @@ class SMAPI:
         file.close()
         return(x.text)           
         
+    def GetAllMailingLists(self):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/list"
+        
+
+        myobjs = {""}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.get(url, headers = header)
+        return(x.json())
+        
+        
+    def RemoveSubscribersMailingList(self,input_mailingListId,email):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/subscriber-remove"
+        
+
+        myobjs = {"data":email}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+        
+        
+    def AddBannedUserMailingList(self,input_mailingListId,email):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/banned-user-add"
+        
+
+        myobjs = {"data":email}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+        
+    def AddDigestSubscribers(self,input_mailingListId,email):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/digest-subscriber-add"
+        
+
+        myobjs = {'data':email}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+        
+    def RemoveSubscribersMailingListALL(self,input_mailingListId):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/subscriber-remove-all"
+        
+
+        #myobjs = {"data":email}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url,  headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+        
+    def EditSubscriberMailinglists(self,input_subscriberEmail,input_mailingListId,input_mailingListId2):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/subscribers/" + input_subscriberEmail + "/edit/" + input_mailingListId + ""
+        
+
+        myobjs = {'subscribedLists':"1,2"}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+        
+    def GetSubscriberMailingList(self,input_mailingListId,input_subscriberEmail):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/subscribers/" + input_subscriberEmail + "/" + input_mailingListId + ""
+        
+
+        myobjs = {""}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.get(url, headers = header)
+        return(x.json())
+        
+        
+        
+         
+    def OptInUser(self,input_data,input_post):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/optin/" + input_data + ""
+        
+
+        myobjs = {"data":input_post}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        return(x.json())
+        
+        
+        
+        
+    def OptInUser(self,input_data,input_post):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/optin/" + input_data + ""
+        
+
+        myobjs = {"data":input_post}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        return(x.json())
+        
+        
+        
+    def RemoveDigestSubscribers(self,input_mailingListId,sub_email):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/digest-subscriber-remove"
+        
+
+        myobjs = {"data":sub_email}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        return(x.json())      
+        
+        
+    def RemoveDigestSubscribersALL(self,input_mailingListId):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/digest-subscriber-remove-all"
+        
+
+        #myobjs = {"data":sub_email}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, headers = header)
+        return(x.json()) 

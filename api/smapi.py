@@ -275,3 +275,15 @@ class SMAPI:
         header = {'Authorization' : 'Bearer ' + auth}
         x = requests.post(url, headers = header)
         return(x.json()) 
+  
+    def SendMessage(self,email_from,email_to,subject,body):
+    
+        global auth
+        url = self.url + "/api/v1/mail/message-put"
+        
+
+        myobjs = {"from":email_from,"subject":subject,"to":email_to,"messagePlainText":body}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)

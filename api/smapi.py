@@ -299,3 +299,16 @@ class SMAPI:
         x = requests.post(url, data = myobjs, headers = header)
         x.encoding = x.apparent_encoding
         return(x.text)
+    
+    def RestoreFolders(self,folder,email,recursive):
+    
+        global auth
+        url = self.url + "/api/v1/settings/sysadmin/restore-folders"
+        
+
+        myobjs = {"restorations":[{'folder':folder,'email':email,'recursive':recursive}]}
+
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, json = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)

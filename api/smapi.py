@@ -205,7 +205,7 @@ class SMAPI:
         url = self.url + "/api/v1/settings/domain/mailing-lists/subscribers/" + input_subscriberEmail + "/edit/" + input_mailingListId + ""
         
 
-        myobjs = {'subscribedLists':"1,2"}
+        myobjs = {'subscribedLists':"input_mailingListId2"}
         header = {'Authorization' : 'Bearer ' + auth}
         x = requests.post(url, data = myobjs, headers = header)
         x.encoding = x.apparent_encoding
@@ -262,7 +262,19 @@ class SMAPI:
         myobjs = {"data":sub_email}
         header = {'Authorization' : 'Bearer ' + auth}
         x = requests.post(url, data = myobjs, headers = header)
-        return(x.json())      
+        return(x.json()) 
+
+
+    def AddDigestSubscribers(self,input_mailingListId,sub_email):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/digest-subscriber-add"
+        
+
+        myobjs = {"data":sub_email}
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, data = myobjs, headers = header)
+        return(x.json())
         
         
     def RemoveDigestSubscribersALL(self,input_mailingListId):
@@ -274,8 +286,8 @@ class SMAPI:
         #myobjs = {"data":sub_email}
         header = {'Authorization' : 'Bearer ' + auth}
         x = requests.post(url, headers = header)
-        return(x.json()) 
-  
+        return(x.json())      
+        
     def SendMessage(self,email_from,email_to,subject,body):
     
         global auth

@@ -5,7 +5,7 @@ me = smapi.SMAPI("admin","admin","http://smurl.com")
 me.auth()
 
 #System Admin Only Calls
-me.GetUser("admin@example.com")
+#me.GetUser("admin@example.com")
 #me.SystemDomainDetails("example.com")
 #me.SystemExportDomainsList()
 #me.SystemExportDomainsListToFile("test.csv")

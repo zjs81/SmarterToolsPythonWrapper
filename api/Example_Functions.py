@@ -1,6 +1,6 @@
 import smapi
 
-me = smapi.SMAPI("admin","admin","http://sup-zsylvester.st.local")
+me = smapi.SMAPI("admin","admin","http://smurl.com")
 
 me.auth()
 

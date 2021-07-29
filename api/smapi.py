@@ -312,3 +312,92 @@ class SMAPI:
         x = requests.post(url, json = myobjs, headers = header)
         x.encoding = x.apparent_encoding
         return(x.text)
+        
+        
+    def GetUserFolder(self,folder):
+        global auth
+        url = self.url + "/api/v1/folders/folder"
+        
+
+        myobjs = {'folder':folder}
+
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, json = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+    def ListMailFoldersUsers(self):
+        global auth
+        url = self.url + "/api/v1/folders/list-email-folders"
+        
+
+        #myobjs = {'folder':folder}
+
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.get(url, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+        
+        
+    def SystemadminImpersonateUser(self,email):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/impersonate-user/" + email
+        
+
+        myobjs = {'email':email}
+
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url, json = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        x = x.text
+        x = x.replace("true", '''"true"''')
+        x = x.replace("null", '''"null"''')
+        x = eval(x)
+        auth = x['impersonateAccessToken']
+        return(auth)
+        
+        
+        
+    def GetDomainAdmins(self,domain):
+    
+        global auth
+        url = self.url + "/api/v1/settings/sysadmin/domain-admins/" + domain
+        
+
+        myobjs = {"domain":domain}
+
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.get(url, json = myobjs, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+        
+    def ListUsersDomain(self):
+    
+        global auth
+        url = self.url + "/api/v1/settings/domain/list-users"
+        
+
+       # myobjs = {"domain":domain}
+
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.get(url, headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        
+        
+    def EditFolderUser(self,folder,newFolder):
+    
+        global auth
+        url = self.url + "/api/v1/folders/folder-patch"
+        
+
+        myobjs = {"newFolder":newFolder,"folder":folder}
+
+        header = {'Authorization' : 'Bearer ' + auth}
+        x = requests.post(url,json = myobjs ,headers = header)
+        x.encoding = x.apparent_encoding
+        return(x.text)
+        

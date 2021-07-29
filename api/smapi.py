@@ -1,6 +1,5 @@
 import requests
 global auth
-import time
 class SMAPI:
     
     def __init__(self, username, password, url):

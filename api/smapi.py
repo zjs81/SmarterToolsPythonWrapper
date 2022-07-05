@@ -9,19 +9,16 @@ class SMAPI:
     
 
     def auth(self):
-        global auth
-        username = self.username
-        password = self.password
-        url = self.url
-        authurl = url + "/api/v1/auth/authenticate-user"
-        myobj = {'username': username, 'password':password}
-        x = requests.post(authurl, data = myobj)
-        auth = str(x.text)
-        auth = auth.split(",")
-        auth = auth[11]
-        auth = auth.split(":")
-        auth = auth[1]
-        auth = auth.replace("""\"""", "")
+        global auth 
+        authurl = self.url + "/api/v1/auth/authenticate-user" 
+        myobj = {'username': self.username, 'password':self.password} 
+        data = requests.post(authurl, data = myobj) # this posts the username and password to the api
+        #print(data.json())
+        refreshToken = data.json()['refreshToken'] # this is the refresh token
+        accessToken = data.json()['accessToken'] # this is the access token
+        accessTokenExpiration = data.json()['accessTokenExpiration'] # this is the access token expiration date
+        access_info = {'accessToken': accessToken, 'accessTokenExpiration': accessTokenExpiration, 'refreshToken': refreshToken} # this is the access token, refresh token and expiration info
+        auth = access_info['accessToken'] # this is the access token
         
         
     def GetUser(self,input_email):

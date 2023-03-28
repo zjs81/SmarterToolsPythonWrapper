@@ -1,399 +1,288 @@
 import requests
-global auth
+
 class SMAPI:
     
     def __init__(self, username, password, url):
         self.username = username
         self.password = password
         self.url = url
+        self.auth = self.authenticate()
     
-
-    def auth(self):
-        global auth 
-        authurl = self.url + "/api/v1/auth/authenticate-user" 
-        myobj = {'username': self.username, 'password':self.password} 
-        data = requests.post(authurl, data = myobj) # this posts the username and password to the api
-        #print(data.json())
-        refreshToken = data.json()['refreshToken'] # this is the refresh token
-        accessToken = data.json()['accessToken'] # this is the access token
-        accessTokenExpiration = data.json()['accessTokenExpiration'] # this is the access token expiration date
-        access_info = {'accessToken': accessToken, 'accessTokenExpiration': accessTokenExpiration, 'refreshToken': refreshToken} # this is the access token, refresh token and expiration info
-        auth = access_info['accessToken'] # this is the access token
-        
-        
-    def GetUser(self,input_email):
-        global auth
-        url = self.url + "/api/v1/settings/domain/user/" + input_email +""
-        
-
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())
+    def authenticate(self):
+        """
+        Authenticate the user and store the access token.
+        """
+        auth_url = f"{self.url}/api/v1/auth/authenticate-user"
+        auth_data = {'username': self.username, 'password': self.password}
+        response = requests.post(auth_url, data=auth_data)
+        access_info = response.json()
+        return access_info['accessToken']
     
-    
-    def GetDomain(self):
-        global auth
-        url = self.url + "/api/v1/settings/domain/data"
-        
+    def _get(self, endpoint, path_params=""):
+        """
+        Helper function to perform GET requests.
+        """
+        url = f"{self.url}{endpoint}{path_params}"
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.get(url, headers=headers)
+        return response.json()
 
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())
-        
-    def GetDomainPermissions(self):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/permissions"
-        
-
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())
-        
-    def GetTotalDomainUsers(self):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/total-server-users"
-        
-
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())
-        
-    def GetAlias(self,aliasname):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/alias/" + aliasname + ""
-        
-
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())
-        
-    def DomainAccountListCount(self):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/account-list-counts"
-        
-
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())
-        
-    def SystemDomainDetails(self,input_domain):
-    
-        global auth
-        url = self.url + "/api/v1/settings/sysadmin/domain/" + input_domain + ""
-
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())   
+    def get_user(self, input_email):
+        """
+        Get user data by email.
+        """
+        data = {"email": input_email}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        url = f"{self.url}/api/v1/settings/sysadmin/get-user"
+        return requests.post(url, data=data, headers=headers).json()
 
 
-    def SystemExportDomainsList(self):
-    
-        global auth
-        url = self.url + "/api/v1/settings/sysadmin/export-domains-list"
-        
+    def get_domain(self):
+        """
+        Get domain data.
+        """
+        return self._get("/api/v1/settings/domain/data")
 
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
+    def get_domain_permissions(self):
+        """
+        Get domain permissions.
+        """
+        return self._get("/api/v1/settings/domain/permissions")
 
+    def get_total_domain_users(self):
+        """
+        Get the total number of domain users.
+        """
+        return self._get("/api/v1/settings/domain/total-server-users")
 
-    def SystemExportDomainsListToFile(self,filename):
-    
-        global auth
-        url = self.url + "/api/v1/settings/sysadmin/export-domains-list"
-        
+    def get_alias(self, alias_name):
+        """
+        Get domain alias data.
+        """
+        return self._get("/api/v1/settings/domain/alias/", alias_name)
 
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, headers = header)
-        x.encoding = x.apparent_encoding
-        try:
-            file = open(filename, "x")
-        except:
-            pass
-        file = open(filename, "w")
-        file.write("%s = %s\n" %("x", x.text))
+    def domain_account_list_count(self):
+        """
+        Get domain account list counts.
+        """
+        return self._get("/api/v1/settings/domain/account-list-counts")
+    def system_domain_details(self, input_domain):
+        """
+        Get system domain details.
+        """
+        return self._get("/api/v1/settings/sysadmin/domain/", input_domain)
 
-        file.close()
-        return(x.text)           
-        
-    def GetAllMailingLists(self):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/list"
-        
+    def system_export_domains_list(self):
+        """
+        Export domains list.
+        """
+        url = f"{self.url}/api/v1/settings/sysadmin/export-domains-list"
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())
-        
-        
-    def RemoveSubscribersMailingList(self,input_mailingListId,email):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/subscriber-remove"
-        
+    def system_export_domains_list_to_file(self, filename):
+        """
+        Export domains list and save to a file.
+        """
+        content = self.system_export_domains_list()
+        with open(filename, "w") as file:
+            file.write(f"x = {content}\n")
+        return content
 
-        myobjs = {"data":email}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-        
-    def AddBannedUserMailingList(self,input_mailingListId,email):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/banned-user-add"
-        
+    def get_all_mailing_lists(self):
+        """
+        Get all mailing lists.
+        """
+        return self._get("/api/v1/settings/domain/mailing-lists/list")
 
-        myobjs = {"data":email}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-    def AddDigestSubscribers(self,input_mailingListId,email):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/digest-subscriber-add"
-        
-
-        myobjs = {'data':email}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-    def RemoveSubscribersMailingListALL(self,input_mailingListId):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/subscriber-remove-all"
-        
-
-        #myobjs = {"data":email}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url,  headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-    def EditSubscriberMailinglists(self,input_subscriberEmail,input_mailingListId,input_mailingListId2):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/subscribers/" + input_subscriberEmail + "/edit/" + input_mailingListId + ""
-        
-
-        myobjs = {'subscribedLists':"input_mailingListId2"}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-    def GetSubscriberMailingList(self,input_mailingListId,input_subscriberEmail):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/subscribers/" + input_subscriberEmail + "/" + input_mailingListId + ""
-        
-
-        myobjs = {""}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        return(x.json())
-        
-        
-        
-         
-    def OptInUser(self,input_data,input_post):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/optin/" + input_data + ""
-        
-
-        myobjs = {"data":input_post}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        return(x.json())
-        
-        
-        
-        
-    def OptInUser(self,input_data,input_post):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/optin/" + input_data + ""
-        
-
-        myobjs = {"data":input_post}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        return(x.json())
-        
-        
-        
-    def RemoveDigestSubscribers(self,input_mailingListId,sub_email):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/digest-subscriber-remove"
-        
-
-        myobjs = {"data":sub_email}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        return(x.json()) 
+    def remove_subscribers_mailing_list(self, input_mailing_list_id, email):
+        """
+        Remove subscribers from a mailing list.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/subscriber-remove"
+        data = {"data": email}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, data=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
 
-    def AddDigestSubscribers(self,input_mailingListId,sub_email):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/digest-subscriber-add"
-        
+    def add_banned_user_mailing_list(self, input_mailing_list_id, email):
+        """
+        Add a banned user to a mailing list.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/banned-user-add"
+        data = {"data": email}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, data=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-        myobjs = {"data":sub_email}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        return(x.json())
-        
-        
-    def RemoveDigestSubscribersALL(self,input_mailingListId):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/mailing-lists/" + input_mailingListId + "/digest-subscriber-remove-all"
-        
+    def add_digest_subscribers(self, input_mailing_list_id, email):
+        """
+        Add digest subscribers to a mailing list.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/digest-subscriber-add"
+        data = {'data': email}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, data=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-        #myobjs = {"data":sub_email}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, headers = header)
-        return(x.json())      
-        
-    def SendMessage(self,email_from,email_to,subject,body):
-    
-        global auth
-        url = self.url + "/api/v1/mail/message-put"
-        
+    def remove_subscribers_mailing_list_all(self, input_mailing_list_id):
+        """
+        Remove all subscribers from a mailing list.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/subscriber-remove-all"
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-        myobjs = {"from":email_from,"subject":subject,"to":email_to,"messagePlainText":body}
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, data = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-    
-    def RestoreFolders(self,folder,email,recursive):
-    
-        global auth
-        url = self.url + "/api/v1/settings/sysadmin/restore-folders"
-        
+    def edit_subscriber_mailing_lists(self, input_subscriber_email, input_mailing_list_id, input_mailing_list_id2):
+        """
+        Edit subscriber mailing list information.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/subscribers/{input_subscriber_email}/edit/{input_mailing_list_id}"
+        data = {'subscribedLists': input_mailing_list_id2}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, data=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
+    def get_subscriber_mailing_list(self, input_mailing_list_id, input_subscriber_email):
+        """
+        Get subscriber mailing list information.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/subscribers/{input_subscriber_email}/{input_mailing_list_id}"
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.get(url, headers=headers)
+        return response.json()
 
-        myobjs = {"restorations":[{'folder':folder,'email':email,'recursive':recursive}]}
+    def opt_in_user(self, input_data, input_post):
+        """
+        Opt in a user to a mailing list.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/optin/{input_data}"
+        data = {"data": input_post}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, data=data, headers=headers)
+        return response.json()
 
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, json = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-    def GetUserFolder(self,folder):
-        global auth
-        url = self.url + "/api/v1/folders/folder"
-        
+    def remove_digest_subscribers(self, input_mailing_list_id, sub_email):
+        """
+        Remove digest subscribers from a mailing list.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/digest-subscriber-remove"
+        data = {"data": sub_email}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, data=data, headers=headers)
+        return response.json()
 
-        myobjs = {'folder':folder}
+    def add_digest_subscribers(self, input_mailing_list_id, sub_email):
+        """
+        Add digest subscribers to a mailing list.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/digest-subscriber-add"
+        data = {"data": sub_email}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, data=data, headers=headers)
+        return response.json()
 
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, json = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-    def ListMailFoldersUsers(self):
-        global auth
-        url = self.url + "/api/v1/folders/list-email-folders"
-        
+    def remove_digest_subscribers_all(self, input_mailing_list_id):
+        """
+        Remove all digest subscribers from a mailing list.
+        """
+        url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/digest-subscriber-remove-all"
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, headers=headers)
+        return response.json()
 
-        #myobjs = {'folder':folder}
+    def send_message(self, email_from, email_to, subject, body):
+        """
+        Send a message using the mail API.
+        """
+        url = f"{self.url}/api/v1/mail/message-put"
+        data = {"from": email_from, "subject": subject, "to": email_to, "messagePlainText": body}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, data=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-        
-    def SystemadminImpersonateUser(self,email):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/impersonate-user/" + email
-        
+    def restore_folders(self, folder, email, recursive):
+        """
+        Restore folders for a given email.
+        """
+        url = f"{self.url}/api/v1/settings/sysadmin/restore-folders"
+        data = {"restorations": [{'folder': folder, 'email': email, 'recursive': recursive}]}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, json=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
+    def get_user_folder(self, folder):
+        """
+        Get a user folder.
+        """
+        url = f"{self.url}/api/v1/folders/folder"
+        data = {'folder': folder}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, json=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-        myobjs = {'email':email}
+    def list_mail_folders_users(self):
+        """
+        List mail folders for users.
+        """
+        url = f"{self.url}/api/v1/folders/list-email-folders"
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.get(url, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url, json = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        x = x.text
-        x = x.replace("true", '''"true"''')
-        x = x.replace("null", '''"null"''')
-        x = eval(x)
-        auth = x['impersonateAccessToken']
-        return(auth)
-        
-        
-        
-    def GetDomainAdmins(self,domain):
-    
-        global auth
-        url = self.url + "/api/v1/settings/sysadmin/domain-admins/" + domain
-        
+    def system_admin_impersonate_user(self, email):
+        """
+        Impersonate a user as a system administrator.
+        """
+        url = f"{self.url}/api/v1/settings/domain/impersonate-user/{email}"
+        data = {'email': email}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, json=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        text = response.text.replace("true", '"true"').replace("null", '"null"')
+        result = eval(text)
+        self.auth = result['impersonateAccessToken']
+        return self.auth
 
-        myobjs = {"domain":domain}
+    def get_domain_admins(self, domain):
+        """
+        Get domain admins.
+        """
+        url = f"{self.url}/api/v1/settings/sysadmin/domain-admins/{domain}"
+        data = {"domain": domain}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.get(url, json=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, json = myobjs, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-    def ListUsersDomain(self):
-    
-        global auth
-        url = self.url + "/api/v1/settings/domain/list-users"
-        
+    def list_users_domain(self):
+        """
+        List users in a domain.
+        """
+        url = f"{self.url}/api/v1/settings/domain/list-users"
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.get(url, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text
 
-       # myobjs = {"domain":domain}
-
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.get(url, headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
-        
-    def EditFolderUser(self,folder,newFolder):
-    
-        global auth
-        url = self.url + "/api/v1/folders/folder-patch"
-        
-
-        myobjs = {"newFolder":newFolder,"folder":folder}
-
-        header = {'Authorization' : 'Bearer ' + auth}
-        x = requests.post(url,json = myobjs ,headers = header)
-        x.encoding = x.apparent_encoding
-        return(x.text)
-        
+    def edit_folder_user(self, folder, new_folder):
+        """
+        Edit a user folder.
+        """
+        url = f"{self.url}/api/v1/folders/folder-patch"
+        data = {"newFolder": new_folder, "folder": folder}
+        headers = {'Authorization': f'Bearer {self.auth}'}
+        response = requests.post(url, json=data, headers=headers)
+        response.encoding = response.apparent_encoding
+        return response.text

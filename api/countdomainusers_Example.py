@@ -2,11 +2,10 @@ import smapi
 import csv
 
 
-me = smapi.SMAPI("admin","admin","http://smurl.com")
+me = smapi.SMAPI("admin","systemadminupassword","https://mail.domain.com")
 
-me.auth()
 
-me.SystemExportDomainsListToFile("test.csv")
+me.system_export_domains_list_to_file("test.csv")
 
 domains = open("test.csv", "r")
 read_file = csv.reader(domains,dialect='excel')
@@ -19,7 +18,7 @@ for s in read_file:
             pass
         else:
             d = s[0]
-            z = me.SystemDomainDetails(d)
+            z = me.system_domain_details(d)
             z = str(z)
             z = z.split(",")
             print(z[4])
@@ -33,4 +32,3 @@ for s in read_file:
         pass
 print(TotalUsers)
 domains.close()
-   

@@ -3,8 +3,10 @@ This Python library is a simple and easy-to-use wrapper for the SmarterMail API.
 Installation
 You can install the library using pip:
 ```
-pip install smapi
+pip install smartermail-api
 ```
+https://pypi.org/project/smartermail-api/
+
 Usage
 To use the SmarterMail API wrapper, first import the library and create an instance of the SMAPI class with your SmarterMail credentials:
 

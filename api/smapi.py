@@ -7,6 +7,7 @@ class SMAPI:
         self.password = password
         self.url = url
         self.auth = self.authenticate()
+
     
     def authenticate(self):
         """
@@ -245,7 +246,7 @@ class SMAPI:
         """
         Impersonate a user as a system administrator.
         """
-        url = f"{self.url}/api/v1/settings/domain/impersonate-user/{email}"
+        url = f"{self.url}/api/v1/settings/domain/impersonate-user"
         data = {'email': email}
         headers = {'Authorization': f'Bearer {self.auth}'}
         response = requests.post(url, json=data, headers=headers)
@@ -286,3 +287,9 @@ class SMAPI:
         response = requests.post(url, json=data, headers=headers)
         response.encoding = response.apparent_encoding
         return response.text
+    
+    def get_github(self):
+        """
+        Get github repo
+        """
+        print("Visit https://github.com/zjs81/SmarterToolsPythonWrapper Thanks for using this wrapper! ")

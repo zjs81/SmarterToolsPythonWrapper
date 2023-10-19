@@ -1,4 +1,7 @@
 
+# Files for local development
+dev_*
+.env
 
 #======== GitHub Python .gitignore ========
 

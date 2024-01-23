@@ -1,6 +1,7 @@
 import requests
 import json
 
+
 class SMAPI:
     def __init__(self, username, password, url):
         self.username = username
@@ -15,11 +16,11 @@ class SMAPI:
         """
         auth_url = f"{self.url}/api/v1/auth/authenticate-user"
         auth_data = {"username": self.username, "password": self.password}
-        response = requests.post(auth_url, data=auth_data)
+        response = requests.post(auth_url, json=auth_data)
         access_info = response.json()
         return access_info["accessToken"]
 
-    def _get(self, endpoint, path_params="", alt_auth=False):
+    def _get(self, endpoint, path_params="", alt_auth=False, other_headers=None):
         """
         Helper function to perform GET requests.
 
@@ -35,11 +36,52 @@ class SMAPI:
         url = f"{self.url}{endpoint}{path_params}"
         if alt_auth:
             if not self.auth_impersonate:
-                raise ValueError("No impersonate token. Need to `impersonate_user()` first.")
+                raise ValueError(
+                    "No impersonate token. Need to `impersonate_user()` first."
+                )
             headers = {"Authorization": f"Bearer {self.auth_impersonate}"}
         else:
             headers = {"Authorization": f"Bearer {self.auth}"}
+        if other_headers and type(other_headers) is dict:
+            headers.update(other_headers)
+
         response = requests.get(url, headers=headers)
+        return response.json()
+
+    def _post(
+        self, endpoint, path_params="", alt_auth=False, other_headers=None, data=None
+    ):
+        """
+        Helper function to perform POSt requests.
+
+        Parameters
+        ----------
+        endpoint:
+            The endpoint.
+        path_params:
+            The path params. Defaults to an empty string.
+        alt_auth: bool
+            Defaults to False. Set to True to use current impersonated user.
+        data: dict
+            Defaults to empty dict. Data to be posted
+
+        """
+        if not data:
+            data = {}
+
+        url = f"{self.url}{endpoint}{path_params}"
+        if alt_auth:
+            if not self.auth_impersonate:
+                raise ValueError(
+                    "No impersonate token. Need to `impersonate_user()` first."
+                )
+            headers = {"Authorization": f"Bearer {self.auth_impersonate}"}
+        else:
+            headers = {"Authorization": f"Bearer {self.auth}"}
+        if other_headers and type(other_headers) is dict:
+            headers.update(other_headers)
+
+        response = requests.post(url, headers=headers, json=data)
         return response.json()
 
     def get_user(self, input_email):
@@ -49,9 +91,9 @@ class SMAPI:
         data = {"email": input_email}
         headers = {"Authorization": f"Bearer {self.auth}"}
         url = f"{self.url}/api/v1/settings/sysadmin/get-user"
-        return requests.post(url, data=data, headers=headers).json()
+        return requests.post(url, json=data, headers=headers).json()
 
-    def get_domain(self, domain:str, return_type: str="inner"):
+    def get_domain(self, domain: str, return_type: str = "inner"):
         """
         Get domain data.
 
@@ -135,7 +177,7 @@ class SMAPI:
         url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/subscriber-remove"
         data = {"data": email}
         headers = {"Authorization": f"Bearer {self.auth}"}
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
         response.encoding = response.apparent_encoding
         return response.text
 
@@ -146,7 +188,7 @@ class SMAPI:
         url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/banned-user-add"
         data = {"data": email}
         headers = {"Authorization": f"Bearer {self.auth}"}
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
         response.encoding = response.apparent_encoding
         return response.text
 
@@ -157,7 +199,7 @@ class SMAPI:
         url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/digest-subscriber-add"
         data = {"data": email}
         headers = {"Authorization": f"Bearer {self.auth}"}
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
         response.encoding = response.apparent_encoding
         return response.text
 
@@ -180,7 +222,7 @@ class SMAPI:
         url = f"{self.url}/api/v1/settings/domain/mailing-lists/subscribers/{input_subscriber_email}/edit/{input_mailing_list_id}"
         data = {"subscribedLists": input_mailing_list_id2}
         headers = {"Authorization": f"Bearer {self.auth}"}
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
         response.encoding = response.apparent_encoding
         return response.text
 
@@ -202,7 +244,7 @@ class SMAPI:
         url = f"{self.url}/api/v1/settings/domain/mailing-lists/optin/{input_data}"
         data = {"data": input_post}
         headers = {"Authorization": f"Bearer {self.auth}"}
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
         return response.json()
 
     def remove_digest_subscribers(self, input_mailing_list_id, sub_email):
@@ -212,7 +254,7 @@ class SMAPI:
         url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/digest-subscriber-remove"
         data = {"data": sub_email}
         headers = {"Authorization": f"Bearer {self.auth}"}
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
         return response.json()
 
     def add_digest_subscribers(self, input_mailing_list_id, sub_email):
@@ -222,7 +264,7 @@ class SMAPI:
         url = f"{self.url}/api/v1/settings/domain/mailing-lists/{input_mailing_list_id}/digest-subscriber-add"
         data = {"data": sub_email}
         headers = {"Authorization": f"Bearer {self.auth}"}
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
         return response.json()
 
     def remove_digest_subscribers_all(self, input_mailing_list_id):
@@ -246,7 +288,7 @@ class SMAPI:
             "messagePlainText": body,
         }
         headers = {"Authorization": f"Bearer {self.auth}"}
-        response = requests.post(url, data=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
         response.encoding = response.apparent_encoding
         return response.text
 
@@ -312,7 +354,7 @@ class SMAPI:
         self.auth_impersonate = result["impersonateAccessToken"]
         return None
 
-    def get_domain_admins(self, domain:str, return_type="inner"):
+    def get_domain_admins(self, domain: str, return_type="inner"):
         """
         Get domain admins.
 
@@ -321,7 +363,7 @@ class SMAPI:
         domain: str
             The domain name in SmarterMail.
         return_type: str
-            Default value is "inner" and will return a list of the domain admin 
+            Default value is "inner" and will return a list of the domain admin
             email addresses. Set to anything else, returns `response.text`
 
         """
@@ -360,7 +402,7 @@ class SMAPI:
 
     def get_github(self):
         """
-        Get github repo
+        Get GitHub repo
         """
         print(
             "Visit https://github.com/zjs81/SmarterToolsPythonWrapper Thanks for using this wrapper! "
